@@ -1,0 +1,95 @@
+--- !ditz.rubyforge.org,2008-03-06/project 
+name: TimeTracker
+version: "0.5"
+components: 
+- !ditz.rubyforge.org,2008-03-06/component 
+  name: TimeTracker
+releases: 
+- !ditz.rubyforge.org,2008-03-06/release 
+  name: "2008.2"
+  status: :released
+  release_time: 2008-11-23 17:43:46.204831 Z
+  log_events: 
+  - - 2008-11-20 13:35:10.814270 Z
+    - Sean Russell <ser@ser1.net>
+    - created
+    - Implements the ability to create and time tasks.
+  - - 2008-11-23 17:43:46.204873 Z
+    - Sean Russell <ser@ser1.net>
+    - released
+    - ""
+- !ditz.rubyforge.org,2008-03-06/release 
+  name: "2008.3"
+  status: :released
+  release_time: 2008-11-29 17:05:49.222064 Z
+  log_events: 
+  - - 2008-11-23 17:39:32.720138 Z
+    - Sean Russell <ser@ser1.net>
+    - created
+    - Minor feature enhancements and bug fixes
+  - - 2008-11-29 17:05:49.222106 Z
+    - Sean Russell <ser@ser1.net>
+    - released
+    - Ready for release
+- !ditz.rubyforge.org,2008-03-06/release 
+  name: "2008.4"
+  status: :released
+  release_time: 2008-12-10 02:58:57.176853 Z
+  log_events: 
+  - - 2008-11-23 17:40:57.485557 Z
+    - Sean Russell <ser@ser1.net>
+    - created
+    - ""
+  - - 2008-12-10 02:58:57.176880 Z
+    - Sean Russell <ser@ser1.net>
+    - released
+    - ""
+- !ditz.rubyforge.org,2008-03-06/release 
+  name: "2008.5"
+  status: :released
+  release_time: 2008-12-15 13:27:25.306533 Z
+  log_events: 
+  - - 2008-12-05 12:47:32.782162 Z
+    - Sean Russell <ser@ser1.net>
+    - created
+    - ""
+  - - 2008-12-15 13:27:25.306561 Z
+    - Sean Russell <ser@ser1.net>
+    - released
+    - ""
+- !ditz.rubyforge.org,2008-03-06/release 
+  name: "2009.1"
+  status: :unreleased
+  release_time: 
+  log_events: 
+  - - 2008-12-15 02:08:21.977827 Z
+    - Sean Russell <ser@ser1.net>
+    - created
+    - ""
+- !ditz.rubyforge.org,2008-03-06/release 
+  name: "2009.2"
+  status: :unreleased
+  release_time: 
+  log_events: 
+  - - 2009-01-07 01:39:00.588806 Z
+    - Sean Russell <ser@ser1.net>
+    - created
+    - ""
+- !ditz.rubyforge.org,2008-03-06/release 
+  name: "2009.3"
+  status: :unreleased
+  release_time: 
+  log_events: 
+  - - 2009-01-18 00:56:47.245699 Z
+    - Sean Russell <ser@ser1.net>
+    - created
+    - ""
+- !ditz.rubyforge.org,2008-03-06/release 
+  name: Promoted
+  status: :unreleased
+  release_time: 
+  log_events: 
+  - - 2009-01-18 01:00:37.389474 Z
+    - Sean Russell <ser@ser1.net>
+    - created
+    - ""
