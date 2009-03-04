@@ -449,7 +449,11 @@ public class Tasks extends ListActivity {
             default: // Unknown
                 break;
         }
-        setTitle(ttl);
+        int total = 0;
+        for (Task t : adapter.tasks) {
+            total += t.getTotal();
+        }
+        setTitle(ttl + " " + formatTotal(total));
         getListView().invalidate();
     }
 
@@ -640,7 +644,7 @@ public class Tasks extends ListActivity {
             total.setTextSize(FONT_SIZE);
             total.setGravity(Gravity.RIGHT);
             total.setTransformationMethod(SingleLineTransformationMethod.getInstance());
-            formatTotal(total, t.getTotal());
+            total.setText(formatTotal(t.getTotal()));
             addView(total, new LinearLayout.LayoutParams(
                     LayoutParams.WRAP_CONTENT, LayoutParams.FILL_PARENT, 0f));
 
@@ -650,7 +654,7 @@ public class Tasks extends ListActivity {
 
         public void setTask(Task t) {
             taskName.setText(t.getTaskName());
-            formatTotal(total, t.getTotal());
+            total.setText(formatTotal(t.getTotal()));
             markupSelectedTask(t);
         }
 
@@ -666,20 +670,19 @@ public class Tasks extends ListActivity {
     private static final long MS_M = 60000;
     private static final long MS_S = 1000;
 
-    static void formatTotal(TextView total, long ttl) {
+    static String formatTotal( long ttl ) {
         long hours = ttl / MS_H;
         long hours_in_ms = hours * MS_H;
         long minutes = (ttl - hours_in_ms) / MS_M;
         long minutes_in_ms = minutes * MS_M;
         long seconds = (ttl - hours_in_ms - minutes_in_ms) / MS_S;
-        String fmt = String.format(FORMAT, hours, minutes, seconds);
-        total.setText(fmt);
+        return String.format(FORMAT, hours, minutes, seconds);        
     }
 
     private class TaskAdapter extends BaseAdapter {
 
         private DBHelper dbHelper;
-        private ArrayList<Task> tasks;
+        protected ArrayList<Task> tasks;
         private Context savedContext;
         private long currentRangeStart;
         private long currentRangeEnd;
