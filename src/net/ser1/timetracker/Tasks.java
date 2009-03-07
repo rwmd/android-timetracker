@@ -5,9 +5,6 @@
  */
 package net.ser1.timetracker;
 
-import java.io.IOException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import static net.ser1.timetracker.DBHelper.END;
 import static net.ser1.timetracker.DBHelper.NAME;
 import static net.ser1.timetracker.DBHelper.RANGES_TABLE;
@@ -20,16 +17,24 @@ import static net.ser1.timetracker.Report.weekEnd;
 import static net.ser1.timetracker.Report.weekStart;
 import static net.ser1.timetracker.TimeRange.NULL;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
+import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
 import java.util.TimerTask;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import android.app.AlertDialog;
 import android.app.DatePickerDialog;
@@ -47,7 +52,6 @@ import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.Looper;
 import android.text.method.SingleLineTransformationMethod;
 import android.text.util.Linkify;
 import android.view.ContextMenu;
@@ -67,11 +71,6 @@ import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.AdapterView.AdapterContextMenuInfo;
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
-import java.io.FileInputStream;
-import java.io.InputStream;
-import java.text.DateFormat;
 
 /**
  * Manages and displays a list of tasks, providing the ability to edit and
@@ -115,7 +114,6 @@ public class Tasks extends ListActivity {
      * The currently selected task when the context menu is invoked.
      */
     private Task selectedTask;
-    private int sYear,  sMonth,  sDay;
     private SharedPreferences preferences;
     private static int FONT_SIZE = 16;
     /**
