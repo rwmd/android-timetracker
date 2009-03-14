@@ -91,7 +91,4 @@ public class Task implements Comparable<Task>{
         return taskName.compareTo(another.getTaskName());
     }
 
-    public boolean isRunning() {
-        return startTime != NULL && endTime == NULL;
-    }
 }

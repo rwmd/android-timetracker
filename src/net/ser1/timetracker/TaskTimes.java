@@ -60,7 +60,7 @@ public class TaskTimes extends ListActivity implements DialogInterface.OnClickLi
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         SharedPreferences preferences = getSharedPreferences("timetracker.pref", MODE_PRIVATE);
-        FONT_SIZE = preferences.getInt(Tasks.FONTSIZE, 16);
+        FONT_SIZE = preferences.getInt("font-size", 16);
         if (adapter == null) {
             adapter = new TimesAdapter(this);
             setListAdapter(adapter);

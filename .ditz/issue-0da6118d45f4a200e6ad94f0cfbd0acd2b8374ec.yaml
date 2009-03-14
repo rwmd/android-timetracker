@@ -4,8 +4,8 @@ desc: |-
   If you move a time to a different day, it still shows up on the same
   day it always did.
 type: :bugfix
-component: TimeTracker
-release: Promoted
+component: tt
+release: "2009.4"
 reporter: Sean Russell <ser@ser1.net>
 status: :unstarted
 disposition: 
@@ -29,4 +29,8 @@ log_events:
 - - 2009-01-30 11:29:04.154992 Z
   - Sean Russell <ser@ser1.net>
   - assigned to release Promoted from 2009.4
+  - ""
+- - 2009-03-07 14:27:57.187969 Z
+  - Sean Russell <ser@ser1.net>
+  - assigned to release 2009.4 from Promoted
   - ""
