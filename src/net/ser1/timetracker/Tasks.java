@@ -158,10 +158,10 @@ public class Tasks extends ListActivity {
 
     @Override
     protected void onPause() {
+        super.onPause();
         if (timer != null) {
             timer.removeCallbacks(updater);
         }
-        super.onPause();
     }
 
     @Override
@@ -172,6 +172,7 @@ public class Tasks extends ListActivity {
 
     @Override
     protected void onResume() {
+        super.onResume();
         // This is only to cause the view to reload, so that we catch 
         // updates to the time list.
         int which = preferences.getInt(VIEW_MODE, 0);
@@ -180,7 +181,6 @@ public class Tasks extends ListActivity {
         if (timer != null && currentlySelected != null) {
             timer.post(updater);
         }
-        super.onResume();
     }
 
     @Override

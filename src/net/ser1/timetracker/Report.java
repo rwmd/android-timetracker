@@ -309,6 +309,7 @@ public class Report extends Activity implements OnClickListener {
     protected void onPause() {
         super.onPause();
         db.close();
+        super.onStop();
     }
     
     private static final int DKYELLOW = Color.argb(150, 100, 100, 0);
