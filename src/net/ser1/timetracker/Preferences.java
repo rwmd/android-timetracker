@@ -5,11 +5,6 @@
 
 package net.ser1.timetracker;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 import android.app.Activity;
 import android.app.ListActivity;
 import android.content.Intent;
@@ -19,6 +14,12 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.ListView;
 import android.widget.SimpleAdapter;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  *
@@ -26,8 +27,7 @@ import android.widget.SimpleAdapter;
  */
 public class Preferences extends ListActivity implements OnClickListener {
     public static final int LARGE = 24;
-    public static final int MEDIUM = 20;
-    public static final int SMALL = 16;
+    public static final int MEDIUM = 16;
     private static final String BOOL = "bool";
     private static final String CURRENT = "current";
     private static final String CURRENTVALUE = "current-value";
@@ -41,7 +41,6 @@ public class Preferences extends ListActivity implements OnClickListener {
     private List<Map<String,String>> prefs;
     private SimpleAdapter adapter;
     protected final String PREFS_ACTION = "PrefsAction";
-    private Map<String,Integer> fontMap;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -102,63 +101,28 @@ public class Preferences extends ListActivity implements OnClickListener {
         prefs.add(pref);
 
         pref = new HashMap<String,String>();
-        pref.put(PREFERENCE, getString(R.string.vibrate));
-        final boolean vibrate = applicationPreferences.getBoolean(Tasks.VIBRATE, false);
-        final String vibrateEnabled = getString(R.string.vibrate_enabled);
-        final String vibrateDisabled = getString(R.string.vibrate_disabled);
-        pref.put(CURRENT,vibrate ? vibrateEnabled : vibrateDisabled);
-        pref.put(DISABLED, vibrate ? vibrateDisabled : vibrateEnabled);
-        pref.put(CURRENTVALUE,String.valueOf(vibrate));
-        pref.put(DISABLEDVALUE,String.valueOf(!vibrate));
-        pref.put(VALUETYPE,BOOL);
-        pref.put(PREFERENCENAME,Tasks.VIBRATE);
-        prefs.add(pref);
-
-        pref = new HashMap<String,String>();
         pref.put(PREFERENCE,getString(R.string.font_size));
-        final int fontSize = applicationPreferences.getInt(Tasks.FONTSIZE,SMALL);
-        updateFontPrefs(pref, fontSize);
+        final int fontSize = applicationPreferences.getInt(Tasks.FONTSIZE,MEDIUM);
+        final String mediumFont = getString(R.string.medium_font);
+        final String largeFont = getString(R.string.large_font);
+        pref.put(CURRENT,fontSize==MEDIUM ? mediumFont : largeFont);
+        pref.put(DISABLED,fontSize==MEDIUM ? largeFont : mediumFont);
+        pref.put(CURRENTVALUE,String.valueOf(fontSize));
+        pref.put(DISABLEDVALUE,String.valueOf(fontSize == MEDIUM ? LARGE : MEDIUM));
         pref.put(VALUETYPE,INT);
         pref.put(PREFERENCENAME,Tasks.FONTSIZE);
         prefs.add(pref);
-        fontMap = new HashMap<String,Integer>(3);
-        fontMap.put(getString(R.string.small_font), SMALL);
-        fontMap.put(getString(R.string.medium_font), MEDIUM);
-        fontMap.put(getString(R.string.large_font), LARGE);
 
         adapter = new SimpleAdapter(this,
                 prefs,
                 R.layout.preferences_row,
                 new String[] {PREFERENCE,CURRENT},
                 new int[] {R.id.preference_name, R.id.current_value} );
-
+        
         setListAdapter(adapter);
         findViewById(R.id.pref_accept).setOnClickListener(this);
         
         super.onCreate(savedInstanceState);
-    }
-    
-    private void updateFontPrefs(Map<String, String> pref, int fontSize) {
-        final String smallFont = getString(R.string.small_font);
-        final String mediumFont = getString(R.string.medium_font);
-        final String largeFont = getString(R.string.large_font);
-        switch (fontSize) {
-        case SMALL:
-            pref.put(CURRENT, smallFont);
-            pref.put(DISABLED, mediumFont);
-            pref.put(DISABLEDVALUE,String.valueOf(MEDIUM));
-            break;
-        case MEDIUM:
-            pref.put(CURRENT, mediumFont);
-            pref.put(DISABLED, largeFont);
-            pref.put(DISABLEDVALUE,String.valueOf(LARGE));
-            break;
-        case LARGE:
-            pref.put(CURRENT, largeFont);
-            pref.put(DISABLED, smallFont);
-            pref.put(DISABLEDVALUE,String.valueOf(SMALL));
-        }
-        pref.put(CURRENTVALUE,String.valueOf(fontSize));
     }
 
     @Override
@@ -173,10 +137,6 @@ public class Preferences extends ListActivity implements OnClickListener {
         String disabled_value = pref.get(DISABLEDVALUE);
         pref.put(CURRENTVALUE,disabled_value);
         pref.put(DISABLEDVALUE,current_value);
-        
-        if (pref.get(PREFERENCENAME).equals(Tasks.FONTSIZE)) {
-            updateFontPrefs(pref,fontMap.get(disabled));  // disabled is the new enabled!
-        }
 
         adapter.notifyDataSetChanged();
         this.getListView().invalidate();

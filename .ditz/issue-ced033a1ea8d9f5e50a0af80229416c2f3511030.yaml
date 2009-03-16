@@ -2,7 +2,7 @@
 title: Check that the "All" view really shows all of the times in the time display
 desc: ""
 type: :bugfix
-component: TimeTracker
+component: tt
 release: 
 reporter: Sean Russell <ser@ser1.net>
 status: :unstarted
@@ -20,7 +20,7 @@ log_events:
   - Sean Russell <ser@ser1.net>
   - assigned to release 2009.4 from 2009.3
   - ""
-- - 2009-03-07 14:13:04.116057 Z
+- - 2009-03-07 14:28:10.356724 Z
   - Sean Russell <ser@ser1.net>
   - unassigned from release 2009.4
   - ""

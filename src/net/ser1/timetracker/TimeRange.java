@@ -1,5 +1,5 @@
 /**
- * TimeTracker+ 
+ * TimeTracker 
  * ©2008, 2009 Sean Russell
  * @author Sean Russell <ser@germane-software.com>
  */
@@ -36,7 +36,7 @@ public class TimeRange implements Comparable<TimeRange> {
         return end - start;
     }
     
-    protected static DateFormat FORMAT = new SimpleDateFormat("HH:mm");
+    private static final DateFormat FORMAT = new SimpleDateFormat("HH:mm");
     public String toString() {
         Date s = new Date(start);
         StringBuffer b = new StringBuffer(FORMAT.format(s));

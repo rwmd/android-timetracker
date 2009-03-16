@@ -3,7 +3,7 @@ title: CSV export is exporting all start times as "AM"
 desc: ""
 type: :bugfix
 component: TimeTracker
-release: "2009.5"
+release: "2009.4"
 reporter: Sean Russell <ser@ser1.net>
 status: :unstarted
 disposition: 
@@ -16,7 +16,7 @@ log_events:
   - Sean Russell <ser@ser1.net>
   - created
   - ""
-- - 2009-03-14 21:01:55.695277 Z
+- - 2009-03-14 20:59:47.214908 Z
   - Sean Russell <ser@ser1.net>
-  - assigned to release 2009.5 from unassigned
+  - assigned to release 2009.4 from unassigned
   - ""

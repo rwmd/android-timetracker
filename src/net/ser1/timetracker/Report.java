@@ -130,12 +130,6 @@ public class Report extends Activity implements OnClickListener {
     }
     
     @Override
-    public void onStop() {
-        db.close();
-        super.onStop();
-    }
-    
-    @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         super.onCreateOptionsMenu(menu);
         menu.add(0, Tasks.EXPORT_VIEW, 0, R.string.export_view)
@@ -315,6 +309,7 @@ public class Report extends Activity implements OnClickListener {
     protected void onPause() {
         super.onPause();
         db.close();
+        super.onStop();
     }
     
     private static final int DKYELLOW = Color.argb(150, 100, 100, 0);

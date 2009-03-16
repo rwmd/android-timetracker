@@ -1,9 +1,9 @@
 --- !ditz.rubyforge.org,2008-03-06/project 
-name: TimeTracker
+name: tt
 version: "0.5"
 components: 
 - !ditz.rubyforge.org,2008-03-06/component 
-  name: TimeTracker
+  name: tt
 releases: 
 - !ditz.rubyforge.org,2008-03-06/release 
   name: "2008.2"
@@ -111,15 +111,6 @@ releases:
   release_time: 
   log_events: 
   - - 2009-01-30 11:27:46.689987 Z
-    - Sean Russell <ser@ser1.net>
-    - created
-    - ""
-- !ditz.rubyforge.org,2008-03-06/release 
-  name: "2009.5"
-  status: :unreleased
-  release_time: 
-  log_events: 
-  - - 2009-03-14 21:01:01.427046 Z
     - Sean Russell <ser@ser1.net>
     - created
     - ""

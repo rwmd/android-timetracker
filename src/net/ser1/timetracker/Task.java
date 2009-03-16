@@ -1,5 +1,5 @@
 /**
- * TimeTracker+
+ * TimeTracker 
  * ©2008, 2009 Sean Russell
  * @author Sean Russell <ser@germane-software.com>
  */
@@ -91,7 +91,4 @@ public class Task implements Comparable<Task>{
         return taskName.compareTo(another.getTaskName());
     }
 
-    public boolean isRunning() {
-        return startTime != NULL && endTime == NULL;
-    }
 }

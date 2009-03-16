@@ -1,13 +1,10 @@
 /**
- * TimeTracker+
+ * TimeTracker 
  * ©2008, 2009 Sean Russell
  * @author Sean Russell <ser@germane-software.com>
  */
 package net.ser1.timetracker;
 
-import java.io.IOException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import static net.ser1.timetracker.DBHelper.END;
 import static net.ser1.timetracker.DBHelper.NAME;
 import static net.ser1.timetracker.DBHelper.RANGES_TABLE;
@@ -20,18 +17,24 @@ import static net.ser1.timetracker.Report.weekEnd;
 import static net.ser1.timetracker.Report.weekStart;
 import static net.ser1.timetracker.TimeRange.NULL;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
+import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
-import java.util.Iterator;
-import java.util.NoSuchElementException;
 import java.util.TimerTask;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import android.app.AlertDialog;
 import android.app.DatePickerDialog;
@@ -46,11 +49,9 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
-import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.Vibrator;
 import android.text.method.SingleLineTransformationMethod;
 import android.text.util.Linkify;
 import android.view.ContextMenu;
@@ -70,29 +71,19 @@ import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.AdapterView.AdapterContextMenuInfo;
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
-import java.io.FileInputStream;
-import java.io.InputStream;
-import java.text.DateFormat;
 
 /**
  * Manages and displays a list of tasks, providing the ability to edit and
  * display individual task items.
+ * 
  * @author ser
  */
 public class Tasks extends ListActivity {
-    public static final String TIMETRACKERPREF = "timetracker.pref";
-    protected static final String FONTSIZE = "font-size";
-    protected static final String MILITARY = "military-time";
-    protected static final String CONCURRENT = "concurrent-tasks";
-    protected static final String SOUND = "sound-enabled";
-    protected static final String VIBRATE = "vibrate-enabled";
 
     protected static final String START_DAY = "start_day";
     protected static final String START_DATE = "start_date";
     protected static final String END_DATE = "end_date";
-    protected static final String VIEW_MODE = "view_mode";
+    private static final String VIEW_MODE = "view_mode";
     protected static final String REPORT_DATE = "report_date";
     /**
      * Defines how each task's time is displayed 
@@ -118,39 +109,24 @@ public class Tasks extends ListActivity {
      * The currently active task (the one that is currently being timed).  There
      * can be only one.
      */
-    private boolean running = false;
+    private Task currentlySelected = null;
     /**
      * The currently selected task when the context menu is invoked.
      */
     private Task selectedTask;
     private SharedPreferences preferences;
-    private static int fontSize = 16;
-    private boolean concurrency;
-    private static MediaPlayer clickPlayer;
-    private boolean playClick = false;
-    private boolean vibrateClick = true;
-    private Vibrator vibrateAgent;
+    private static int FONT_SIZE = 16;
     /**
      * A list of menu options, including both context and options menu items 
      */
-    protected static final int ADD_TASK = 0,
-            EDIT_TASK = 1,  DELETE_TASK = 2,  REPORT = 3,  SHOW_TIMES = 4,
-            CHANGE_VIEW = 5,  SELECT_START_DATE = 6,  SELECT_END_DATE = 7,
-            HELP = 8,  EXPORT_VIEW = 9,  SUCCESS_DIALOG = 10,  ERROR_DIALOG = 11,
-            SET_WEEK_START_DAY = 12,  MORE = 13,  BACKUP = 14, PREFERENCES = 15;
+    protected static final int ADD_TASK = 0,  EDIT_TASK = 1,  DELETE_TASK = 2,  REPORT = 3,  SHOW_TIMES = 4,  CHANGE_VIEW = 5,  SELECT_START_DATE = 6,  SELECT_END_DATE = 7,  HELP = 8,  EXPORT_VIEW = 9,  SUCCESS_DIALOG = 10,  ERROR_DIALOG = 11,  SET_WEEK_START_DAY = 12,  MORE = 13,  BACKUP = 14;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         //android.os.Debug.waitForDebugger();
-        preferences = getSharedPreferences( TIMETRACKERPREF,MODE_PRIVATE);
-        fontSize = preferences.getInt(FONTSIZE, 16);
-        concurrency = preferences.getBoolean(CONCURRENT, false);
-        if (preferences.getBoolean(MILITARY, true)) {
-            TimeRange.FORMAT = new SimpleDateFormat("HH:mm");
-        } else {
-            TimeRange.FORMAT = new SimpleDateFormat("hh:mm a");
-        }
+        preferences = getSharedPreferences("timetracker.pref", MODE_PRIVATE);
+        FONT_SIZE = preferences.getInt("font-size", 16);
 
         int which = preferences.getInt(VIEW_MODE, 0);
         if (adapter == null) {
@@ -166,33 +142,18 @@ public class Tasks extends ListActivity {
 
                 @Override
                 public void run() {
-                    if (running) {
+                    if (currentlySelected != null) {
                         adapter.notifyDataSetChanged();
-                        setTitle();
                         Tasks.this.getListView().invalidate();
                     }
                     timer.postDelayed(this, REFRESH_MS);
                 }
             };
         }
-        playClick = preferences.getBoolean(SOUND, false);
-        if (playClick && clickPlayer == null) {
-            clickPlayer = MediaPlayer.create(this, R.raw.click);
-            try {
-                clickPlayer.prepareAsync();
-            } catch (IllegalStateException illegalStateException) {
-                // ignore this.  There's nothing the user can do about it.
-                Logger.getLogger("TimeTracker").log(Level.SEVERE,
-                        "Failed to set up audio player: "
-                        +illegalStateException.getMessage());
-            }
-        }
         registerForContextMenu(getListView());
         if (adapter.tasks.size() == 0) {
             showDialog(HELP);
         }
-        vibrateAgent = (Vibrator)getSystemService(VIBRATOR_SERVICE);
-        vibrateClick = preferences.getBoolean(VIBRATE, true);
     }
 
     @Override
@@ -205,10 +166,7 @@ public class Tasks extends ListActivity {
 
     @Override
     protected void onStop() {
-        if (adapter != null)
-            adapter.close();
-        if (clickPlayer != null)
-            clickPlayer.release();
+        adapter.close();
         super.onStop();
     }
 
@@ -220,7 +178,7 @@ public class Tasks extends ListActivity {
         int which = preferences.getInt(VIEW_MODE, 0);
         switchView(which);
 
-        if (timer != null && running) {
+        if (timer != null && currentlySelected != null) {
             timer.post(updater);
         }
     }
@@ -265,7 +223,6 @@ public class Tasks extends ListActivity {
     }
     private AlertDialog exportSucceed;
     private String exportMessage;
-    private String baseTitle;
 
     @Override
     public boolean onMenuItemSelected(int featureId, MenuItem item) {
@@ -301,15 +258,20 @@ public class Tasks extends ListActivity {
             case HELP:
                 return openAboutDialog();
             case SUCCESS_DIALOG:
-                exportSucceed = new AlertDialog.Builder(Tasks.this)
-                    .setTitle(R.string.success)
-                    .setIcon(android.R.drawable.stat_notify_sdcard)
-                    .setMessage(exportMessage)
-                    .setPositiveButton(android.R.string.ok, null)
-                    .create();
+                exportSucceed = new AlertDialog.Builder(Tasks.this).setTitle(R.string.success).setIcon(android.R.drawable.stat_notify_sdcard).setMessage(exportMessage).setPositiveButton(android.R.string.ok, null).create();
                 return exportSucceed;
             case ERROR_DIALOG:
                 return new AlertDialog.Builder(Tasks.this).setTitle(R.string.failure).setIcon(android.R.drawable.stat_notify_sdcard).setMessage(exportMessage).setPositiveButton(android.R.string.ok, null).create();
+            case SET_WEEK_START_DAY:
+                return new AlertDialog.Builder(Tasks.this).setItems(R.array.startDays, new DialogInterface.OnClickListener() {
+
+                    public void onClick(DialogInterface dialog, int which) {
+                        SharedPreferences.Editor ed = preferences.edit();
+                        ed.putInt(START_DAY, which);
+                        ed.commit();
+                        switchView(preferences.getInt(VIEW_MODE, 0));
+                    }
+                }).create();
             case MORE:
                 return new AlertDialog.Builder(Tasks.this).setItems(R.array.moreMenu, new DialogInterface.OnClickListener() {
 
@@ -331,7 +293,10 @@ public class Tasks extends ListActivity {
                                     showDialog(ERROR_DIALOG);
                                 }
                                 break;
-                            case 2: // COPY DB TO SD
+                            case 2: // SET_WEEK_START_DAY:
+                                showDialog(SET_WEEK_START_DAY);
+                                break;
+                            case 3: // COPY DB TO SD
                                 try {
                                     copyDbToSd();
                                     exportMessage = getString(R.string.backup_success);
@@ -341,10 +306,6 @@ public class Tasks extends ListActivity {
                                     exportMessage = ex.getLocalizedMessage();
                                     showDialog(ERROR_DIALOG);
                                 }
-                                break;
-                            case 3: // PREFERENCES
-                                Intent intent = new Intent(Tasks.this, Preferences.class);
-                                startActivityForResult(intent,PREFERENCES);
                                 break;
                             case 4: // HELP:
                                 showDialog(HELP);
@@ -357,8 +318,7 @@ public class Tasks extends ListActivity {
         }
         return null;
     }
-
-    // TODO: This could be done better...
+    // TODO: This could be better...
     private static final String dbPath = "/data/data/net.ser1.timetracker/databases/timetracker.db";
     private static final String dbBackup = "/sdcard/timetracker.db";
 
@@ -487,17 +447,12 @@ public class Tasks extends ListActivity {
             default: // Unknown
                 break;
         }
-        baseTitle = ttl;
-        setTitle();
-        getListView().invalidate();
-    }
-    
-    private void setTitle() {
         int total = 0;
         for (Task t : adapter.tasks) {
             total += t.getTotal();
         }
-        setTitle(baseTitle + " " + formatTotal(total));
+        setTitle(ttl + " " + formatTotal(total));
+        getListView().invalidate();
     }
 
     /**
@@ -617,6 +572,15 @@ public class Tasks extends ListActivity {
 
         TextView version = (TextView) about.findViewById(R.id.version);
         version.setText(formattedVersion);
+        TextView donate = (TextView) about.findViewById(R.id.donate);
+        donate.setClickable(true);
+        donate.setOnClickListener(new OnClickListener() {
+
+            public void onClick(View v) {
+                Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse("http://www.germane-software.com/donate.html"));
+                startActivity(intent);
+            }
+        });
         TextView links = (TextView) about.findViewById(R.id.usage);
         Linkify.addLinks(links, Linkify.ALL);
         links = (TextView) about.findViewById(R.id.credits);
@@ -663,7 +627,7 @@ public class Tasks extends ListActivity {
             setPadding(5, 10, 5, 10);
 
             taskName = new TextView(context);
-            taskName.setTextSize(fontSize);
+            taskName.setTextSize(FONT_SIZE);
             taskName.setText(t.getTaskName());
             addView(taskName, new LinearLayout.LayoutParams(
                     LayoutParams.WRAP_CONTENT, LayoutParams.FILL_PARENT, 1f));
@@ -675,7 +639,7 @@ public class Tasks extends ListActivity {
                     LayoutParams.WRAP_CONTENT, LayoutParams.FILL_PARENT, 0f));
 
             total = new TextView(context);
-            total.setTextSize(fontSize);
+            total.setTextSize(FONT_SIZE);
             total.setGravity(Gravity.RIGHT);
             total.setTransformationMethod(SingleLineTransformationMethod.getInstance());
             total.setText(formatTotal(t.getTotal()));
@@ -687,15 +651,13 @@ public class Tasks extends ListActivity {
         }
 
         public void setTask(Task t) {
-            taskName.setTextSize(fontSize);
-            total.setTextSize(fontSize);
             taskName.setText(t.getTaskName());
             total.setText(formatTotal(t.getTotal()));
             markupSelectedTask(t);
         }
 
         private void markupSelectedTask(Task t) {
-            if (t.isRunning()) {
+            if (t.equals(currentlySelected)) {
                 checkMark.setVisibility(View.VISIBLE);
             } else {
                 checkMark.setVisibility(View.INVISIBLE);
@@ -819,7 +781,7 @@ public class Tasks extends ListActivity {
                 } while (c.moveToNext());
             }
             c.close();
-            running = findCurrentlyActive().hasNext();
+            currentlySelected = findCurrentlyActive();
             notifyDataSetChanged();
         }
 
@@ -846,34 +808,13 @@ public class Tasks extends ListActivity {
             return r;
         }
 
-        public Iterator<Task> findCurrentlyActive() {
-            return new Iterator<Task>() {
-                Iterator<Task> iter = tasks.iterator();
-                Task next = null;
-                public boolean hasNext() {
-                    if (next != null) return true;
-                    while (iter.hasNext()) {
-                        Task t = iter.next();
-                        if (t.isRunning()) {
-                            next = t;
-                            return true;
-                        }
-                    }
-                    return false;
+        public Task findCurrentlyActive() {
+            for (Task cur : tasks) {
+                if (cur.getEndTime() == NULL && cur.getStartTime() != NULL) {
+                    return cur;
                 }
-                public Task next() {
-                    if (hasNext()) {
-                        Task t = next;
-                        next = null;
-                        return t;
-                    }
-                    throw new NoSuchElementException();
-                }
-
-                public void remove() {
-                    throw new UnsupportedOperationException();
-                }                
-            };
+            }
+            return null;
         }
 
         protected void addTask(String taskName) {
@@ -955,61 +896,28 @@ public class Tasks extends ListActivity {
 
     @Override
     protected void onListItemClick(ListView l, View v, int position, long id) {
-        if (vibrateClick) vibrateAgent.vibrate(100);
-        if (playClick) {
-            try {
-                //clickPlayer.prepare();
-                clickPlayer.start();
-            } catch (Exception exception) {
-                // Ignore this; it is probably because the media isn't yet ready.
-                // There's nothing the user can do about it.
-                // ignore this.  There's nothing the user can do about it.
-                Logger.getLogger("TimeTracker").log(Level.INFO,
-                        "Failed to play audio: "
-                        +exception.getMessage());
-            }
-        }
-
         // Stop the update.  If a task is already running and we're stopping
         // the timer, it'll stay stopped.  If a task is already running and 
         // we're switching to a new task, or if nothing is running and we're
         // starting a new timer, then it'll be restarted.
-
+        timer.removeCallbacks(updater);
+        // Disable previous
+        if (currentlySelected != null) {
+            currentlySelected.stop();
+            adapter.updateTask(currentlySelected);
+        }
+        // Enable current
         Object item = getListView().getItemAtPosition(position);
         if (item != null) {
             Task selected = (Task) item;
-            if (!concurrency) {
-                boolean startSelected = !selected.isRunning();
-                if (running) {
-                    running = false;
-                    timer.removeCallbacks(updater);
-                    // Disable currently running tasks
-                    for (Iterator<Task> iter = adapter.findCurrentlyActive();
-                         iter.hasNext();) {
-                        Task t = iter.next();
-                        t.stop();
-                        adapter.updateTask(t);
-                    }
-                }
-                if (startSelected) {
-                    selected.start();
-                    running = true;
-                    timer.post(updater);
-                }
+            if (selected.equals(currentlySelected)) {
+                currentlySelected = null;
             } else {
-                if (selected.isRunning()) {
-                    selected.stop();
-                    running = adapter.findCurrentlyActive().hasNext();
-                    if (!running) timer.removeCallbacks(updater);
-                } else {
-                    selected.start();
-                    if (!running) {
-                        running = true;
-                        timer.post(updater);
-                    }
-                }
+                currentlySelected = selected;
+                currentlySelected.start();
+                adapter.updateTask(selected);
+                timer.post(updater);
             }
-            adapter.updateTask(selected);
         }
         getListView().invalidate();
         super.onListItemClick(l, v, position, id);
@@ -1017,44 +925,6 @@ public class Tasks extends ListActivity {
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (requestCode == PREFERENCES) {
-            Bundle extras = data.getExtras();
-            if (extras.getBoolean(START_DAY)) {
-                switchView(preferences.getInt(VIEW_MODE, 0));
-            }
-            if (extras.getBoolean(MILITARY)) {
-                if (preferences.getBoolean(MILITARY, true)) {
-                    TimeRange.FORMAT = new SimpleDateFormat("HH:mm");
-                } else {
-                    TimeRange.FORMAT = new SimpleDateFormat("hh:mm a");
-                }
-            }
-            if (extras.getBoolean(CONCURRENT)) {
-                concurrency = preferences.getBoolean(CONCURRENT, false);
-            }
-            if (extras.getBoolean(SOUND)) {
-                playClick = preferences.getBoolean(SOUND, false);
-                if (playClick && clickPlayer == null) {
-                    clickPlayer = MediaPlayer.create(this, R.raw.click);
-                    try {
-                        clickPlayer.prepareAsync();
-                        clickPlayer.setVolume(1, 1);
-                    } catch (IllegalStateException illegalStateException) {
-                        // ignore this.  There's nothing the user can do about it.
-                        Logger.getLogger("TimeTracker").log(Level.SEVERE,
-                                "Failed to set up audio player: "
-                                +illegalStateException.getMessage());
-                    }
-                }
-            }
-            if (extras.getBoolean(VIBRATE)) {
-                vibrateClick = preferences.getBoolean(VIBRATE, true);
-            }
-            if (extras.getBoolean(FONTSIZE)) {
-                fontSize = preferences.getInt(FONTSIZE, 16);
-            }
-        }
-
         if (getListView() != null) {
             getListView().invalidate();
         }
