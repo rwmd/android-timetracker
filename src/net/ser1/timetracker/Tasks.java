@@ -35,6 +35,8 @@ import java.util.Date;
 import java.util.TimerTask;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import android.app.AlertDialog;
 import android.app.DatePickerDialog;
@@ -49,7 +51,6 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
-import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.text.method.SingleLineTransformationMethod;
@@ -62,7 +63,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ContextMenu.ContextMenuInfo;
-import android.view.View.OnClickListener;
 import android.widget.BaseAdapter;
 import android.widget.DatePicker;
 import android.widget.EditText;
@@ -71,6 +71,8 @@ import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.AdapterView.AdapterContextMenuInfo;
+import android.net.Uri;
+import android.view.View.OnClickListener;
 
 /**
  * Manages and displays a list of tasks, providing the ability to edit and
@@ -300,6 +302,9 @@ public class Tasks extends ListActivity {
                                 try {
                                     copyDbToSd();
                                     exportMessage = getString(R.string.backup_success);
+                                    if (exportSucceed != null) {
+                                        exportSucceed.setMessage(exportMessage);
+                                    }
                                     showDialog(SUCCESS_DIALOG);
                                 } catch (Exception ex) {
                                     Logger.getLogger(Tasks.class.getName()).log(Level.SEVERE, null, ex);
