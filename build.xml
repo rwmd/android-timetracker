@@ -92,6 +92,7 @@
 	</condition>
 
 	<property name="out-unsigned-package" value="${outdir}/${ant.project.name}-unsigned.apk" />
+  <property name="dist.apk" value="${outdir}/${ant.project.name}-unsigned.apk" />
 	<condition property="out-unsigned-package-ospath" value="${basedir}\${out-unsigned-package}" else="${basedir}/${out-unsigned-package}">
 		<os family="windows" />
 	</condition>
@@ -131,6 +132,10 @@
 		<targetfilelist dir="${basedir}" files="AndroidManifest.xml"/>
 	</dependset>
 
+
+  <!--
+  <import file="nbproject/build-impl.xml"/>
+  -->
 
 	<!-- Rules -->
 
@@ -342,6 +347,13 @@
 			<arg value='--stylesheet-path=docs/style.css' />
 			<arg value='${docsource}' />
 		</exec>
+
+		<apply executable="rst2pdf" dest="docs/design" parallel="true">
+      <srcfile/>
+      <fileset dir="docs/design" includes="*.rst"/>
+      <mapper type="glob" from="*.rst" to="*.pdf"/>
+    </apply>
+
 	</target>
 
 	<target name="-res-compile" depends="resource-src" />
@@ -369,5 +381,6 @@
 	<!-- checked in to the repository.                              -->
 	<import file="sign.xml" />
 	<!-- ########################################################## -->
+
 
 </project>
