@@ -76,6 +76,9 @@ import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.AdapterView.AdapterContextMenuInfo;
+import android.widget.ArrayAdapter;
+import android.widget.Spinner;
+import java.util.Set;
 
 /**
  * Manages and displays a list of tasks, providing the ability to edit and
@@ -127,6 +130,14 @@ public class Tasks extends ListActivity {
      * The currently selected task when the context menu is invoked.
      */
     private Task selectedTask;
+    /**
+     * Handles the DB storage of tags
+     */
+    private TagHandler tagHandler;
+    /**
+     * A list of known tags
+     */
+    private Set<Tag> tags;
     private SharedPreferences preferences;
     private static int fontSize = 16;
     private boolean concurrency;
@@ -207,6 +218,9 @@ public class Tasks extends ListActivity {
         }
         vibrateAgent = (Vibrator)getSystemService(VIBRATOR_SERVICE);
         vibrateClick = preferences.getBoolean(VIBRATE, true);
+
+        tagHandler = new TagHandler(this, adapter.dbHelper.getWritableDatabase());
+        tags = tagHandler.getTags();
     }
 
     @Override
@@ -251,7 +265,7 @@ public class Tasks extends ListActivity {
     @Override
     public void onCreateContextMenu(ContextMenu menu, View v,
             ContextMenuInfo menuInfo) {
-        menu.setHeaderTitle("Task menu");
+        menu.setHeaderTitle(getText(R.string.task_menu));
         menu.add(0, EDIT_TASK, 0, getText(R.string.edit_task));
         menu.add(0, DELETE_TASK, 0, getText(R.string.delete_task));
         menu.add(0, SHOW_TIMES, 0, getText(R.string.show_times));
@@ -555,10 +569,14 @@ public class Tasks extends ListActivity {
             public void onClick(DialogInterface dialog, int whichButton) {
                 EditText textView = (EditText) textEntryView.findViewById(R.id.task_edit_name_edit);
                 String name = textView.getText().toString();
-                adapter.addTask(name);
+                addTask(name);
                 Tasks.this.getListView().invalidate();
             }
         }).setNegativeButton(android.R.string.cancel, null).create();
+    }
+
+    public void addTask( String name ) {
+        adapter.addTask(name);
     }
 
     /**
@@ -567,17 +585,27 @@ public class Tasks extends ListActivity {
      * @return the progressDialog to display
      */
     private Dialog openEditTaskDialog() {
+        
+
         if (selectedTask == null) {
             return null;
         }
         LayoutInflater factory = LayoutInflater.from(this);
         final View textEntryView = factory.inflate(R.layout.edit_task, null);
+        Spinner tagView = (Spinner)textEntryView.findViewById(R.id.tag_chooser);
+        ArrayAdapter<Tag> tagsModel = new ArrayAdapter<Tag>(this, android.R.layout.simple_spinner_item);
+        tagsModel.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        tagView.setAdapter(tagsModel);
+        for (Tag t : tags) {
+            tagsModel.add(t);
+        }
         return new AlertDialog.Builder(Tasks.this).setView(textEntryView).setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
 
             public void onClick(DialogInterface dialog, int whichButton) {
                 EditText textView = (EditText) textEntryView.findViewById(R.id.task_edit_name_edit);
                 String name = textView.getText().toString();
                 selectedTask.setTaskName(name);
+
 
                 adapter.updateTask(selectedTask);
 
@@ -785,6 +813,10 @@ public class Tasks extends ListActivity {
         	seconds = 0;
         }
         return String.format(format, hours, minutes, seconds);            	    	
+    }
+
+    public List<Task> getTasks() {
+        return (List<Task>)adapter.tasks.clone();
     }
 
     private class TaskAdapter extends BaseAdapter {

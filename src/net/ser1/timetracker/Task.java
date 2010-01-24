@@ -7,7 +7,9 @@ package net.ser1.timetracker;
 
 import static net.ser1.timetracker.TimeRange.NULL;
 
-public class Task implements Comparable<Task>{
+import java.io.Serializable;
+
+public class Task implements Serializable, Comparable<Task>{
     private String taskName;
     private int id;
     private long startTime = NULL;

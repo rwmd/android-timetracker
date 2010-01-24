@@ -10,6 +10,11 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
 public class DBHelper extends SQLiteOpenHelper {
+	// Table names
+    public static final String RANGES_TABLE = "ranges";
+    public static final String TASK_TABLE = "tasks";
+    public static final String TAGS_TABLE = "tags";
+
     public static final String END = "end";
     public static final String START = "start";
     public static final String TASK_ID = "task_id";
@@ -17,11 +22,10 @@ public class DBHelper extends SQLiteOpenHelper {
     public static final String NAME = "name";
     public static final String[] TASK_COLUMNS = new String[] { "ROWID", NAME };
     public static final String TIMETRACKER_DB_NAME = "timetracker.db";
-    public static final int DBVERSION = 5;
-    public static final String RANGES_TABLE = "ranges";
-    public static final String TASK_TABLE = "tasks";
+    public static final int DBVERSION = 6;
     public static final String TASK_NAME = "name";
     public static final String ID_NAME = "_id";
+    public static final String TAG = "tagname";
 
     public DBHelper(Context context) {
         super( context, TIMETRACKER_DB_NAME, null, DBVERSION );
@@ -49,6 +53,9 @@ public class DBHelper extends SQLiteOpenHelper {
                 + START+" INTEGER NOT NULL,"
                 + END+" INTEGER"
                 + ");");
+        db.execSQL("CREATE TABLE "+TAGS_TABLE+"("
+                + TASK_ID + " INTEGER NOT NULL,"
+                + TAG + " TEXT NOT NULL );");
     }
 
     @Override
