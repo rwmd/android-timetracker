@@ -1,0 +1,1 @@
+TimeTracker helps you record the amount of time you spend on activities; for example, for recording time in a time sheet at work. It provides ways to view, edit, and filter times, and provides a time sheet report as well.
